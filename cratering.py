@@ -1,31 +1,17 @@
 import numpy
-import random
 import matplotlib.pyplot as plt
 
-"""
-Project: Consider a square portion of a planetary surface measuring 500 km on a side,
-subject to impacts at an average rate of 1/1000 years for craters larger than 10 km in diameter.
-
-1.Simulate impactsonto this surface resulting in craters larger than 10 km until the area is saturated(or longer),
-computing the number of craters as a function of time. Assume one impact every 1000 years.
-Keep in mind that “early craters” can be erased by “later impacts”. Ignore effects such as erosion, secondary craters, etc.
-
-Choices you will need to make:
-    •The size distribution of impactors (pick one size, or allow a range of sizes?)
-    •The size of the region of the surface “obliterated” by an impact
-    •How to determine that a crater is recognizable on a surface•How to determine whether your surface is “saturated”
-a)(10 pts) State all assumptions you made during this exercise.
-b)(10) Plot “pictures”of the area at 3-4intervals during the calculation.
-c)(10) Plot the number of craters evident on the surface as a function of time, and indicate the time to saturation.
-"""
-
+"""Global vars for random 'housekeeping'"""
 SURFACE_SIZE = 500
 IMPACT_TIME = 1000
 PARAM = 1.5
 SAT_COUNT = []
 SAT_POINT = (0,0)
 
-
+"""
+Crater Object: Holds its x,y coordinate, and its radiusR (radius x-direction) and radiusC (radius y-direction)
+Also handles the fill function which turns off the entries in the matrix corisponding to the crater
+"""
 class Crater:
     def __init__(self, x, y, radiusR, radiusC):
         self.radiusR = radiusR
@@ -39,6 +25,7 @@ class Crater:
             surface[(self.x):(self.x + self.radiusR), (self.y - self.radiusC):(self.y + self.radiusC)] = 0
         else:
             surface[(self.x - self.radiusR):(self.x), (self.y - self.radiusC):(self.y + self.radiusC)] = 0
+        """The original code for fill is below"""
         #surface[(self.x - self.radiusR):(self.x + self.radiusR), (self.y - self.radiusC):(self.y + self.radiusC)] = 0
 
 def createSurface():
@@ -160,6 +147,7 @@ if __name__ == "__main__":
             if ((crater.x < impactR + ejectaR) and (crater.x > impactR - ejectaR) and (crater.y < impactC + ejectaC) and
             (crater.y > impactC - ejectaC)):
                 crater.fill(surface)
+                """For original code, remove this if-statement but keep the code run after it"""
                 if (crater.covered == 2):
                     cList.remove(crater)
                     craterCounter -= 1

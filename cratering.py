@@ -1,5 +1,7 @@
 import numpy
 import matplotlib.pyplot as plt
+import random
+from crater import Crater
 
 """Global vars for random 'housekeeping'"""
 SURFACE_SIZE = 500
@@ -7,26 +9,6 @@ IMPACT_TIME = 1000
 PARAM = 1.5
 SAT_COUNT = []
 SAT_POINT = (0,0)
-
-"""
-Crater Object: Holds its x,y coordinate, and its radiusR (radius x-direction) and radiusC (radius y-direction)
-Also handles the fill function which turns off the entries in the matrix corisponding to the crater
-"""
-class Crater:
-    def __init__(self, x, y, radiusR, radiusC):
-        self.radiusR = radiusR
-        self.radiusC = radiusC
-        self.x = x
-        self.y = y
-        self.covered = 0
-    def fill(self, surface):
-        self.covered += 1
-        if (self.covered == 2):
-            surface[(self.x):(self.x + self.radiusR), (self.y - self.radiusC):(self.y + self.radiusC)] = 0
-        else:
-            surface[(self.x - self.radiusR):(self.x), (self.y - self.radiusC):(self.y + self.radiusC)] = 0
-        """The original code for fill is below"""
-        #surface[(self.x - self.radiusR):(self.x + self.radiusR), (self.y - self.radiusC):(self.y + self.radiusC)] = 0
 
 def createSurface():
     return numpy.zeros((SURFACE_SIZE, SURFACE_SIZE))
@@ -62,11 +44,7 @@ def filledSurface(surface, cc, counter):
             return True
 
 def makePlot(surface, year):
-    """
-    Given a matrix (surface), plot the matrix with 0s one color and 1s another color
-    This code is a combination from pyplot docs and stackoverflow
-    (I can never remember how to graph with pyplot)
-    """
+
     year = str(year*1000)
     fig = plt.figure(figsize=(6, 4))
 
@@ -84,7 +62,7 @@ def makePlot(surface, year):
     plt.show()
 
 if __name__ == "__main__":
-    #Createa a surface
+    #Create a surface
     surface = createSurface()
 
     #Counter = 'years' in thousands
@@ -99,21 +77,13 @@ if __name__ == "__main__":
     charts = []
     percent = []
     cList = []
-    #While the surface is not filled with astroid craters
-    #TODO: Add some decay factor to the matrix (tuple maybe)
     while (filledSurface(surface, craterCounter, counter) and (counter < 7000000)):
         counter += 1
-        """ Generate a crater size from an exponential dist centered around 1.5 """
         craterSize = (numpy.random.exponential(PARAM) + 1)
 
         #multiply by 10, because of the Dr = Dc/10 relationship
         craterR, craterC = int(craterSize*10), int(craterSize*10)
-        #where on the grid it will impact
         impactR, impactC = random.randint(0,500), random.randint(0,500)
-        """
-        Fill in 1s at CraterR, CraterC to the crater size
-        If the size goes out of bounds, just fill 1's up to the ends
-        """
 
         """This is just to not get an 'index out of bound' error """
         row, col = int((craterR)/2), int((craterC)/2)
@@ -132,7 +102,7 @@ if __name__ == "__main__":
         """
         ejectaR = int(row*1.5)
         ejectaC = int(col*1.5)
-        """This is just to not get an 'index out of bound' error """
+
         if ((impactR - ejectaR) < 0):
             ejectaR = impactR
         if ((impactC - ejectaC) < 0):
@@ -147,10 +117,8 @@ if __name__ == "__main__":
             if ((crater.x < impactR + ejectaR) and (crater.x > impactR - ejectaR) and (crater.y < impactC + ejectaC) and
             (crater.y > impactC - ejectaC)):
                 crater.fill(surface)
-                """For original code, remove this if-statement but keep the code run after it"""
-                if (crater.covered == 2):
-                    cList.remove(crater)
-                    craterCounter -= 1
+                cList.remove(crater)
+                craterCounter -= 1
 
         """Now fill the impact zone with 1s"""
         surface[(impactR - row):(impactR + row), (impactC - col):(impactC + col)] = 1
@@ -158,10 +126,7 @@ if __name__ == "__main__":
         craterCounter += 1
         cc.append(craterCounter)
         y.append(counter*1000)
-        #plt.plot(cc, y)
-        #plt.show()
 
-        """Keep a list of surfaces with the amount of craters and counter"""
         charts.append((surface.copy(), counter))
 
 
@@ -169,7 +134,6 @@ if __name__ == "__main__":
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(y, cc, lw=0.8)
-    #plt.plot(y, cc)
     ax.plot(SAT_POINT[0]*1000, SAT_POINT[1], marker='o')
     ax = fig.add_subplot(111)
     ax.annotate('Saturation ', xy=(SAT_POINT[0]*1000, SAT_POINT[1]+5), xytext=(SAT_POINT[0]*1000-50, SAT_POINT[1]+30), fontsize=10,
@@ -184,4 +148,3 @@ if __name__ == "__main__":
             makePlot(charts[10][0], charts[10][1])
         else:
             makePlot(charts[i][0], charts[i][1])
-    makePlot(charts[-1][0], charts[-1][1])
